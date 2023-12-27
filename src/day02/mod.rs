@@ -4,7 +4,7 @@ use std::collections::HashMap;
 
 pub fn run(fname: &str) {
     part1(fname);
-    // part2(fname);
+    part2(fname);
 }
 
 fn parse_game(_game_num: i32, line: &String) -> Vec<HashMap<String, i32>> {
@@ -42,6 +42,22 @@ fn valid_game(lims: &HashMap<String, i32>, game: Vec<HashMap<String, i32>>) -> b
     return true;
 }
 
+fn min_lims(game: Vec<HashMap<String, i32>>) -> HashMap<String, i32> {
+    let mut out: HashMap<String, i32> = HashMap::from([
+        ("red".to_string()  , i32::MIN),
+        ("green".to_string(), i32::MIN),
+        ("blue".to_string() , i32::MIN)
+    ]);
+    for grab in game {
+        for (k, v) in grab {
+            if v > out[&k] {
+                out.insert(k, v);
+            }
+        }
+    }
+    return out;
+}
+
 pub fn part1(fname: &str) -> i32 {
     let mut out: i32 = 0;
     let mut game_num: i32 = 1;
@@ -65,15 +81,21 @@ pub fn part1(fname: &str) -> i32 {
     return out;
 }
 
-// pub fn part2(fname: &str) -> i32 {
-//     let out: i32 = 0;
-//     let line_num: i32 = 1;
-//     let lines = read_lines(fname);
-//     for line in lines {
-//         // println!("{line_num}--{line}");
-//         //line_num += 1;
-//     }
-//     // println!("dayXX: part2: sum = {out}");
-//     return out;
-// }
+pub fn part2(fname: &str) -> i32 {
+    let mut out: i32 = 0;
+    let mut game_num: i32 = 1;
+    let lines = read_lines(fname);
+    for line in lines {
+        let game = parse_game(game_num, &line);
+        println!("\ngame = {game:?}");
+        let mlim = min_lims(game);
+        println!("mlim = {mlim:?}");
+        let pow: i32 = mlim.values().product();
+        out += pow;
+        println!("{game_num}--{line}");
+        game_num += 1;
+    }
+    println!("day02: part2: answer = {out}");
+    return out;
+}
 
