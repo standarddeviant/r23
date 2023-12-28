@@ -13,7 +13,8 @@ pub fn part1(fname: &str) -> i32 {
         println!("{line_num}--{line}");
         line_num += 1;
     }
-    println!("dayXX: part1: sum = {out}");
+    out = 42;
+    println!("dayXX: part1: answer = {out}");
     return out;
 }
 
@@ -25,7 +26,8 @@ pub fn part2(fname: &str) -> i32 {
         println!("{line_num}--{line}");
         line_num += 1;
     }
-    println!("dayXX: part2: sum = {out}");
+    out = 42;
+    println!("dayXX: part2: answer = {out}");
     return out;
 }
 
