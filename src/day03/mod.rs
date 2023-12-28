@@ -8,29 +8,36 @@ pub fn run(fname: &str) {
     // part2(fname);
 }
 
+fn parse_digs_syms(lines: &Vec<String>) -> (Vec<Vec<Match>>, Vec<Vec<Match>>) {
+    let re_digs= Regex::new(r"\d+").unwrap();
+    let re_syms= Regex::new(r"[^0-9\.]").unwrap();
+    let mut digs: Vec<Vec<Match>> = vec![];
+    let mut syms: Vec<Vec<Match>> = vec![];
+    // let lines = read_lines(fname);
+
+    // for (_line_ix, line) in &lines.iter().enumerate() {
+    for line in lines {
+        let tmp_digs: Vec<Match> = re_digs.find_iter(&line).collect();
+        let tmp_syms: Vec<Match> = re_syms.find_iter(&line).collect();
+        digs.push(tmp_digs.clone());
+        syms.push(tmp_syms.clone());
+    } // end regex SEARCH loop
+    return (digs, syms);
+}
+
 pub fn part1(fname: &str) -> i32 {
     // NOTE: IMPORTANT!!!!: PART NUMS CAN BE REPEATED AND ARE ***NOT*** UNIQUE!!!
     // NOTE: IMPORTANT!!!!: PART NUMS CAN BE REPEATED AND ARE ***NOT*** UNIQUE!!!
     // NOTE: IMPORTANT!!!!: PART NUMS CAN BE REPEATED AND ARE ***NOT*** UNIQUE!!!
     let mut part_nums: Vec<i32> = vec![];
-    let mut digs: Vec<Vec<Match>> = vec![];
-    let mut syms: Vec<Vec<Match>> = vec![];
-    let lines: Vec<String> = read_lines(fname);
-    let re_digs= Regex::new(r"\d+").unwrap();
-    let re_syms= Regex::new(r"[^0-9\.]").unwrap();
-
-    for (_line_ix, line) in lines.iter().enumerate() {
-        let tmp_digs: Vec<Match> = re_digs.find_iter(line).collect();
-        let tmp_syms: Vec<Match> = re_syms.find_iter(line).collect();
-        digs.push(tmp_digs.clone());
-        syms.push(tmp_syms.clone());
-    } // end regex SEARCH loop
+    let lines = read_lines(fname);
+    let (digs, syms) = parse_digs_syms(&lines);
 
     for (line_ix, tmp_digs) in digs.iter().enumerate() {
         let mut sym_line_checks: Vec<usize> = vec![];
         if line_ix >             0 { sym_line_checks.push(line_ix - 1); }
         if true                    { sym_line_checks.push(line_ix + 0); }
-        if line_ix < lines.len()-1 { sym_line_checks.push(line_ix + 1); }
+        if line_ix < digs.len()-1  { sym_line_checks.push(line_ix + 1); }
         'digloop: for d in tmp_digs {
             // println!("{d:?}");
             for chkix in &sym_line_checks {
