@@ -5,7 +5,8 @@ use crate::utils::read_lines;
 pub fn run(fname: &str) {
     let part1_answer = part1(fname);
     println!("day03: part1: answer = {}", part1_answer);
-    // part2(fname);
+    let part2_answer = part2(fname);
+    println!("day03: part2: answer = {}", part2_answer);
 }
 
 fn parse_digs_syms(lines: &Vec<String>) -> (Vec<Vec<Match>>, Vec<Vec<Match>>) {
@@ -61,15 +62,48 @@ pub fn part1(fname: &str) -> i32 {
     return part_nums.iter().sum();
 }
 
-// pub fn part2(fname: &str) -> i32 {
-//     let mut out: i32 = 0;
-//     let mut line_num: i32 = 1;
-//     let lines = read_lines(fname);
-//     for line in lines {
-//         println!("{line_num}--{line}");
-//         line_num += 1;
-//     }
-//     println!("dayXX: part2: sum = {out}");
-//     return out;
-// }
+pub fn part2(fname: &str) -> i64 {
+    // let mut part_nums: Vec<i32> = vec![];
+    let mut gears: Vec<Vec<Match>> = vec![];
+    let lines = read_lines(fname);
+    let (digs, syms) = parse_digs_syms(&lines);
+
+    // find gears, calculate ratios
+    for (line_ix, line_syms) in syms.iter().enumerate() {
+        let mut line_check_ixs: Vec<usize> = vec![];
+        if line_ix >             0 { line_check_ixs.push(line_ix - 1); }
+        if true                    { line_check_ixs.push(line_ix + 0); }
+        if line_ix < digs.len()-1  { line_check_ixs.push(line_ix + 1); }
+        'symloop: for s in line_syms {
+            let mut tmp_gear: Vec<Match> = vec![s.clone()];
+            // println!("{d:?}");
+            for chkix in &line_check_ixs{
+                let chkdigs = &digs[*chkix].clone();
+                for d in chkdigs {
+                    // println!("{s:?}");
+                    let digixs = (d.start() as i32 - 1_i32, d.end() as i32 + 1_i32);
+                    let symixs = (s.start() as i32        , s.end() as i32        );
+                    // println!("{d:?}, {s:?}, {digixs:?}, {symixs:?}");
+                    if digixs.0 <= symixs.0 && symixs.1 <= digixs.1 {
+                        tmp_gear.push(*d);
+                        if tmp_gear.len() >= 3 {
+                            gears.push(tmp_gear);
+                            continue 'symloop; // continue checking following digits
+                        }
+                    }
+                }
+            }
+        }
+    } // end gear search
+
+    let mut out: i64 = 0;
+    for g in gears {
+        let d1 = g[1].as_str().parse::<i32>().unwrap() as i64;
+        let d2 = g[2].as_str().parse::<i32>().unwrap() as i64;
+        // println!("{d1}, {d2}");
+        out += d1 * d2;
+    }
+
+    return out;
+}
 
