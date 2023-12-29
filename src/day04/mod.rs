@@ -1,15 +1,12 @@
-use core::num;
-use std::collections::HashSet;
-
 use crate::utils::read_lines;
-use regex::{Regex, Match};
+use regex::Regex;
 
 pub fn run(fname: &str, win_len: usize) {
     let part1_answer = part1(fname, win_len);
     println!("day04: part1: answer = {part1_answer}");
 
-    // let part2_answer = part2(fname, win_len);
-    // println!("day04: part2: answer = {part2_answer}");
+    let part2_answer = part2(fname, win_len);
+    println!("day04: part2: answer = {part2_answer}");
 }
 
 fn parse_cards(lines: &Vec<String>) -> Vec<Vec<i32>> {
@@ -61,23 +58,40 @@ pub fn part1(fname: &str, win_len: usize) -> i32 {
     return answer;
 }
 
-// 310459 is too low
+//   310459 is too low
+// 18133159 is too high
 pub fn part2(fname: &str, win_len: usize) -> i32 {
-    let mut answer: i32 = 0;
-    let mut line_num: i32 = 1;
     let lines = read_lines(fname);
     let cards = parse_cards(&lines);
+
+    let win_counts_1x: Vec<usize> = cards.iter().map(
+        |card| win_count(card, win_len)
+    ).collect();
+
+    // we'll fill these values in below
+    let mut copy_counts: Vec<i32> = vec![1; cards.len()];
+    // let scores_1x: Vec<i32> =
+    //     cards.iter()
+    //     .map(|card| score_card(card, win_len))
+    //     .collect();
+
+    // iterate through each game and count copies of cards
     for ix in 0..cards.len() {
-        let card = &cards[ix];
-        let num_winning_cards = win_count(card, win_len);
-        for ix2 in ix+1 .. ix+1+num_winning_cards {
-        // for ix2 in 0..3 {
-            if ix2 < cards.len() {
-                let tmp_card = &cards[ix2];
-                answer += score_card(card, win_len);
+        let wc1x = win_counts_1x[ix];
+        // 'play' each copy of the card
+        for _copyix in 0..copy_counts[ix] {
+            for ix2 in ix+1 .. ix+1+wc1x {
+                if ix2 < copy_counts.len() {
+                    copy_counts[ix2] += 1;
+                }
             }
         }
     }
-    return answer;
+
+    // for ix in 0..scores_1x.len() {
+    //     answer += scores_1x[ix] * copy_counts[ix];
+    // }
+
+    return copy_counts.iter().sum();
 }
 
