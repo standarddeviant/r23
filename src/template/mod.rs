@@ -2,6 +2,7 @@ use crate::utils::read_lines;
 
 pub fn run(fname: &str) {
     part1(fname);
+    println!("");
     part2(fname);
 }
 
