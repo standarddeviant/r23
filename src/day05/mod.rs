@@ -63,18 +63,17 @@ fn parse_maps(lines: &Vec<String>) -> (Vec<i64>, Vec<Vec<Vec<i64>>>) {
 
 // 130120695 is too low
 pub fn part1(fname: &str) -> i64 {
-    let mut answer: i64 = 0;
+    // let mut answer: i64 = 0;
     let lines = read_lines(fname);
     let (seeds, maps) = parse_maps(&lines);
 
     let mut locations: Vec<i64> = vec![];
     for seed in seeds {
-        let mut xfer_count = 0;
+        // let mut xfer_count = 0;
         let mut src_val = seed;
         // println!("\nseed = {src_val}");
 
         'maploop: for map in &maps {
-            let mut found_lookup = false;
             for r in map {
                 let dst_rng = r[0] .. r[0]+r[2];
                 let src_rng = r[1] .. r[1]+r[2];
@@ -83,18 +82,17 @@ pub fn part1(fname: &str) -> i64 {
                     // println!("{new_src_val} <- {dst_rng:?} <<<<<< {src_rng:?} <- {src_val}");
                     // println!("{src_val} -> {src_rng:?} >>>>>> {dst_rng:?} -> {new_src_val}");
                     src_val = new_src_val;
-                    xfer_count += 1;
-                    found_lookup = true;
+                    // xfer_count += 1;
+                    // found_lookup = true;
                     continue 'maploop;
                 }
             }
-            // if we get here, and found_lookup is false, then dst = src
-            // but... this just means src_val = src_val...
-            if !found_lookup {
-                xfer_count += 1;
-                // println!("{src_val}  >>>>>>  {src_val}");
-            }
+            // if we get here and didn't find a dst/src lookup pair, then
+            // src = dst, but dst becomes src for the next loop iteration
+            // so, it's non-obvious, but there's correctly nothing to do here.
+            // src = dst
         }
+        
         // after the 'maploop, src_val should actually be the location we're looking for
         let loc = src_val;
         // println!("loc = {loc}, xfer_count = {xfer_count}, {:?}", maps.len());
@@ -104,9 +102,7 @@ pub fn part1(fname: &str) -> i64 {
 
     // println!("locations = {locations:?}");
 
-    answer = *locations.iter().min().unwrap();
-
-    return answer;
+    return *locations.iter().min().unwrap();
 }
 
 // TODO: move this to utils.rs w/ a generic arg type
@@ -180,12 +176,11 @@ fn rng_inter_diffs(a: &Range<i64>, b: &Range<i64>) -> (Vec<Range<i64>>, Vec<Rang
 }
 
 pub fn part2(fname: &str) -> i64 {
-    let mut answer = 0;
     let lines = read_lines(fname);
     let (seeds, orig_maps) = parse_maps(&lines);
 
     // convert seeds to vector of Range<i64>
-    let mut seed_rngs: Vec<Range<i64>> = 
+    let seed_rngs: Vec<Range<i64>> = 
         zip(
             seeds[0..].iter().step_by(2),
             seeds[1..].iter().step_by(2)
@@ -214,22 +209,22 @@ pub fn part2(fname: &str) -> i64 {
     // TODO - clean up the 'nestiness' of this function
 
     // iterate over maps
-    let mut map_ix = 0;
+    let _map_ix = 0;
     let mut src: VecDeque<Range<i64>> = VecDeque::from(seed_rngs.clone());
     let mut dst: Vec<Range<i64>> = vec![];
-    'map_loop: for (map_ix, map) in maps.iter().enumerate() {
+    '_map_loop: for (_map_ix, map) in maps.iter().enumerate() {
 
         // use map (i.e. dst/src range pairs) to xfer src -> dst
         // println!("{map_ix} : src = {src:?}");
         // println!("map = {map:?}");
-        'map1x_loop: loop {
+        '_map1x_loop: loop {
             let mut inter_count = 0;
             // let mut exclusions: Vec<Range<i64>> = vec![];
             // let mut no_inters: Vec<
             'src_loop: while !src.is_empty() {
                 let s = src.pop_front().unwrap();
                 // check through all ranges in map vs. s, the bit of src we just popped
-                'map_rng_lu_loop: for (rd, rs) in map {
+                '_map_rng_lu_loop: for (rd, rs) in map {
                     let (inter, diffs) = rng_inter_diffs(&s, rs);
                     if inter.len() > 0 {
                         // count this range intersection
@@ -279,8 +274,6 @@ pub fn part2(fname: &str) -> i64 {
     let locs = src;
     // println!("locs = {locs:?}");
 
-    answer = locs.iter().map(|x| x.start).min().unwrap();
-
-    return answer;
+    return locs.iter().map(|x| x.start).min().unwrap();
 }
 
