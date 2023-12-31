@@ -4,7 +4,8 @@ pub mod utils;
 // mod day02;
 // mod day03;
 // mod day04;
-mod day05;
+// mod day05;
+mod day06;
 
 fn main() {
     // env_logger::init();
@@ -14,5 +15,7 @@ fn main() {
     // day04::run("day04/test1.txt", 5);
     // day04::run("day04/input.txt", 10);
     // day05::run("day05/test1.txt");
-    day05::run("day05/input.txt");
+    // day05::run("day05/input.txt");
+    // day06::run("day06/test1.txt");
+    day06::run("day06/input.txt");
 }
