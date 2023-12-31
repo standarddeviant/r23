@@ -1,5 +1,6 @@
 
-use std::fs::read_to_string;
+use std::{fmt::Debug, fs::read_to_string, str::FromStr};
+use regex::Regex;
 
 pub fn read_lines(filename: &str) -> Vec<String> {
     read_to_string(filename) 
@@ -8,3 +9,29 @@ pub fn read_lines(filename: &str) -> Vec<String> {
         .map(String::from)  // make each slice into a string
         .collect()  // gather them together into a vector
 }
+
+pub fn parse_digs<T>(line: &String) -> Option<Vec<T>>
+    where T: FromStr + Debug
+{
+    let mut parsed_digs: Vec<T> = vec![];
+    let re_digs: Regex = Regex::new(r"\d+").unwrap();
+    // let mut parsed_digs: Vec<T> = vec![];
+        
+    // let parsed_digs = 
+    //     |m| m.as_str().parse::<T>()?
+    // )
+    // .collect();
+
+    for m in re_digs.find_iter(&line) {
+        if let Ok(value) = m.as_str().parse::<T>() {
+            parsed_digs.push(value);
+        }
+        else {
+            return None;
+        }
+    }
+
+    return Some(parsed_digs);
+}
+
+ 
