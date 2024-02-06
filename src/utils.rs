@@ -2,6 +2,12 @@
 use std::{fmt::Debug, fs::read_to_string, str::FromStr};
 use regex::Regex;
 
+pub fn argsort<T: Ord>(data: &[T]) -> Vec<usize> {
+    let mut indices = (0..data.len()).collect::<Vec<_>>();
+    indices.sort_by_key(|&i| &data[i]);
+    indices
+}
+
 pub fn read_lines(filename: &str) -> Vec<String> {
     read_to_string(filename) 
         .unwrap()  // panic on possible file-reading errors
