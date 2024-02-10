@@ -1,153 +1,127 @@
-use std::{collections::HashMap, io::Read};
-use std::cmp::Ordering;
-use crate::utils::{read_lines, parse_digs};
-
+// use std::ops::Deref;
+// use std::str::FromStr;
+use crate::utils::read_lines;
+use num::integer::lcm;
+// use std::cmp::Ordering;
+use std::collections::HashMap; // , io::Read};
 
 pub fn run(fname: &str) {
     let part1_answer = part1(fname);
-    println!("day07: part1: answer = {part1_answer}");
+    info!("day08: part1: answer = {part1_answer}");
 
     let part2_answer = part2(fname);
-    println!("day07: part2: answer = {part2_answer}");
+    info!("day08: part2: answer = {part2_answer}");
 }
 
-#[derive(Debug, Clone, Copy)]
-enum Hand {
-    HighCard=0,
-    OnePair,
-    TwoPair,
-    ThreeOfAKind,
-    FullHouse,
-    FourOfAKind,
-    FiveOfAkind
-}
-
-fn determine_hand_type(cards: &Vec<u8>, jval: u8) -> Hand {
-    let mut counts: [u8; 15] = [0; 15];
-
-    for c in cards {
-        let ix = *c as usize;
-        counts[ix] += 1;
-    }
-    counts.sort();
-
-    // let keys: Vec<&u8> = counts.keys().collect();
-    // let mut vals: Vec<u8> = counts.values().collect();
-    // vals.sort_by(|a, b| b.cmp(a));
-
-    // handle part2
-    // hacky, special case flagging (jval==1 for part2)
-    let mut jcount: u8 = 0;
-    if jval == 1 && counts[jval as usize] > 0 {
-        jcount = counts[jval as usize];
+fn parse_input(fname: &str) -> (Vec<u8>, HashMap<String, [String; 2]>) {
+    let lines = read_lines(fname);
+    // assume rigid, perfect format for simplicity
+    let keys: Vec<u8> = lines[0]
+        .chars()
+        .map(|c| if c == 'L' { 0 } else { 1 })
+        .collect();
+    let mut map: HashMap<String, [String; 2]> = HashMap::new();
+    for line in lines[2..].iter() {
+        // 0..|...7..|.C..
+        // AAA = (BBB, BBB)
+        let k: String = line[0..3].into();
+        let v: [String; 2] = [line[7..10].into(), line[12..15].into()];
+        map.insert(k, v);
     }
 
-    let hand: Hand = 
-    match counts[0] + jcount {
-        5 => Hand::FiveOfAkind,
-        4 => Hand::FourOfAKind,
-        3 => {
-            match counts[1] { 
-                2 => Hand::FullHouse,
-                _ => Hand::ThreeOfAKind
-            }
-        }
-        2 => {
-            match counts[1] {
-                2 => Hand::TwoPair,
-                _ => Hand::OnePair
-            }
-        }
-        _ => Hand::HighCard
-    };
-
-    // println!("keys = {keys:?}");
-    // println!("vals = {vals:?}");
-
-    return hand;
+    (keys, map)
 }
-
-fn parse_hands(lines: &Vec<String>, jval: u8) -> Vec<(Hand, Vec<u8>, i32)> {
-    let mut hands: Vec<(Hand, Vec<u8>, i32)> = vec![];
-    for line in lines {
-        // let line
-        // println!("line = {line}");
-        let parts: Vec<String> = 
-            line.split(" ").map(
-                |x|x.to_string()
-            ).collect();
-        // println!("parts = {parts:?}");
-        let cards: Vec<u8> = parts[0].chars().map(
-            |x| match x {
-                'J'         => jval,
-                '2' ..= '9' => x as u8 - '0' as u8,
-                'T'         => 10_u8,
-                'Q'         => 12_u8,
-                'K'         => 13_u8,
-                'A'         => 14_u8,
-                _ => 0
-            }
-        ).collect();
-
-        let bid: Vec<i32> = parse_digs::<i32>(&parts[1]).unwrap();
-        let bid = bid[0];
-        let hand = determine_hand_type(&cards, jval);
-        hands.push((hand, cards, bid));
-    }
-
-    return hands;
-}
-
-fn sort_hands(hands: &mut Vec<(Hand, Vec<u8>, i32)>) {
-    hands.sort_by(
-        |a, b| -> Ordering {
-            // let a8 = a.0 as u8;
-            // let b8 = b.0 as u8;
-            if (a.0 as u8) > (b.0 as u8) { return Ordering::Greater; }
-            if (a.0 as u8) < (b.0 as u8) { return Ordering::Less; }
-            for ix in 0 .. a.1.len()  {
-                if a.1[ix] > b.1[ix] { return Ordering::Greater; }
-                if a.1[ix] < b.1[ix] { return Ordering::Less; }
-            }
-            return Ordering::Equal;
-        }
-    );
-}
-
-// fn determine_hand(input: &(Vec<u8>, i32)) -> (Hand, Vec<u8>, i32) {
-//     // let (cards, )
-//     return (Hand::HighCard, vec![0; 5], 0);
-// }
 
 pub fn part1(fname: &str) -> i32 {
-    let mut answer: i32 = 0;
-    let lines = read_lines(fname);
-    let mut hands = parse_hands(&lines, 11);
-    sort_hands(&mut hands);
+    let mut kix = 0;
+    let (keys, map) = parse_input(fname);
+    debug!("keys = {keys:?}");
+    debug!("map = {map:?}");
 
-    for (rank_ix, hand) in hands.iter().enumerate() {
-        let rank_val = (rank_ix+1) as i32;
-        let bid = hand.2;
-        answer += rank_val * bid;
-        // println!("hand = {hand:?}");
+    let start: String = String::from("AAA");
+    let finish: String = String::from("ZZZ");
+    let mut current: String = start.clone();
+    while !current.eq(&finish) {
+        let kval = keys[kix % keys.len()] as usize;
+        kix += 1;
+        let branch = map.get(&current).unwrap();
+        branch[kval].clone_into(&mut current);
     }
 
-    return answer;
+    kix as i32
 }
 
-pub fn part2(fname: &str) -> i32 {
-    let mut answer: i32 = 0;
-    let mut line_num: i32 = 1;
-    let lines = read_lines(fname);
-    let mut hands = parse_hands(&lines, 1);
-    sort_hands(&mut hands);
+// it's one of those ones where brute force isn't sufficient
+// 1857219991 is too low
+pub fn part2(fname: &str) -> i128 {
+    let (keys, map) = parse_input(fname);
+    debug!("keys = {keys:?}");
+    debug!("map = {map:?}");
 
-    for (rank_ix, hand) in hands.iter().enumerate() {
-        let rank_val = (rank_ix+1) as i32;
-        let bid = hand.2;
-        answer += rank_val * bid;
-        // println!("hand = {hand:?}");
+    // let starts: Vec<String> = map.keys()
+    let mut starts: Vec<String> = map
+        .keys()
+        .filter_map(|k| {
+            if (*k).ends_with('A') {
+                Some(k.clone())
+            } else {
+                None
+            }
+        })
+        .collect();
+    starts.sort();
+    debug!("starts = {starts:?}");
+
+    let mut offsets: Vec<i128> = vec![];
+    let mut periods: Vec<i128> = vec![];
+    for (startix, s) in starts.iter().enumerate() {
+        let mut zcount = 0;
+        let mut c = s.clone();
+        let mut kix = 0;
+        let mut off: i128 = 0;
+        loop {
+            trace!("s={s}, kix={kix}, c={c}");
+            let kval = keys[kix % keys.len()] as usize;
+            kix += 1;
+            let branch = map.get(&c).unwrap();
+            branch[kval].clone_into(&mut c);
+            if c.ends_with('Z') {
+                zcount += 1;
+                match zcount {
+                    1 => {
+                        // first z = offset
+                        off = kix as i128;
+                    }
+                    2 => {
+                        // second z = period
+                        let per = kix as i128 - off;
+                        // trace!("uwuwuwuwuwuw!, off = {off}, per = {per}");
+                        debug!("startix={startix},kix={kix},off={off},per={per},c={c},branch={branch:?}");
+                        offsets.push(off);
+                        periods.push(per);
+                        break;
+                    }
+                    _ => {
+                        panic!("unexpected: zcount = {zcount}");
+                    }
+                }
+            } // end if c.ends_with("Z")
+              // trace!("startix={startix},kix={kix},off={off},per={per},c={c},branch={branch:?}");
+              // if kix > 10 { break; }
+        } // end loop: offset/period
+          // break;
+    } // for (ix, s) in starts.iter().enumerate()
+
+    // now what to do w/ offsets and periods?
+    debug!("offsets = {offsets:?}");
+    debug!("periods = {periods:?}");
+
+    let mut per_lcm: i128 = 1;
+    for (per_ix, per_val) in periods.clone().iter().enumerate() {
+        per_lcm = lcm(per_lcm, *per_val);
+        debug!("{per_ix} : per_val = {per_val}, per_lcm = {per_lcm}");
     }
-    return answer;
-}
+    debug!("per_lcm = {per_lcm}");
 
+    per_lcm
+}

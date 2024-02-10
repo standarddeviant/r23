@@ -9,12 +9,13 @@ pub mod utils;
 // mod day04;
 // mod day05;
 // mod day06;
-mod day07;
+// mod day07;
+mod day08;
 
 fn main() {
     // set the log level explicitly - remove this when debugging to set log level on the command line via 
     // RUST_LOG=trace cargo run
-    std::env::set_var("RUST_LOG", "info");
+    // std::env::set_var("RUST_LOG", "info");
     pretty_env_logger::init();
     // env_logger::init();
     // day01::run("day01/input.txt");
@@ -28,5 +29,7 @@ fn main() {
     // day06::run("day06/input.txt");
     // day07::run("day07/test1.txt");
     // day07::run("day07/test2.txt");
-    day07::run("day07/input.txt");
+    // day07::run("day07/input.txt");
+    // day08::run("day08/test2.txt");
+    day08::run("day08/input.txt");
 }
