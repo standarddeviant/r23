@@ -9,8 +9,8 @@ pub fn run(fname: &str) {
     let part1_answer = part1(fname);
     info!("day09: part1: answer = {part1_answer}");
 
-    // let part2_answer = part2(fname);
-    // info!("day09: part2: answer = {part2_answer}");
+    let part2_answer = part2(fname);
+    info!("day09: part2: answer = {part2_answer}");
 }
 
 fn parse_input(fname: &str) -> Vec<Vec<IntType>> {
@@ -24,7 +24,7 @@ fn parse_input(fname: &str) -> Vec<Vec<IntType>> {
     line_digs
 }
 
-fn extrapolate(invec: &Vec<IntType>) -> IntType {
+fn extrapolate(invec: &Vec<IntType>, front: bool) -> IntType {
     trace!("invec = {invec:?}");
     // make scratch vec of vecs
     let mut s: Vec<Vec<IntType>> = vec![];
@@ -42,11 +42,20 @@ fn extrapolate(invec: &Vec<IntType>) -> IntType {
         // push diff to scratch vec of vecs
         s.push(diff)
     }
-    let mut answer: IntType = 0 as IntType;
-    for ix in (0..s.len() - 1).rev() {
-        let tmps = s[ix].clone();
-        answer = answer + tmps[tmps.len() - 1];
+    
+    let mut answer: IntType = 0;
+    if front {
+        for ix in (0..s.len() - 1).rev() {
+            let tmps = s[ix].clone();
+            answer = tmps[0] - answer;
+        }
     }
+    else {
+        for ix in (0..s.len() - 1).rev() {
+            let tmps = s[ix].clone();
+            answer = answer + tmps[tmps.len() - 1];
+        }
+   }
     trace!("extrapolate answer = {answer}");
     answer
 }
@@ -55,14 +64,20 @@ fn extrapolate(invec: &Vec<IntType>) -> IntType {
 pub fn part1(fname: &str) -> IntType {
     let lines_digs = parse_input(fname);
     debug!("lines_digs = {lines_digs:?}");
-    let ex_vals: Vec<IntType> = lines_digs.iter().map(|x| extrapolate(x)).collect();
+    let ex_vals: Vec<IntType> = lines_digs.iter().map(|x| extrapolate(x, false)).collect();
     debug!("ex_vals = {ex_vals:?}");
     let answer = ex_vals.iter().sum();
     debug!("answer = {answer:?}");
     answer
 }
 
-// pub fn part2(fname: &str) -> i32 {
-//     let _lines_digs = parse_input(fname);
-//     0
-// }
+pub fn part2(fname: &str) -> IntType {
+    let lines_digs = parse_input(fname);
+    debug!("lines_digs = {lines_digs:?}");
+    let ex_vals: Vec<IntType> = lines_digs.iter().map(|x| extrapolate(x, true)).collect();
+    debug!("ex_vals = {ex_vals:?}");
+    let answer = ex_vals.iter().sum();
+    debug!("answer = {answer:?}");
+    answer
+}
+
